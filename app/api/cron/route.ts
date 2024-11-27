@@ -140,8 +140,8 @@ export async function GET() {
       message: "Products updated successfully",
       data: updatedProducts,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error(error);
-    throw new Error(`Error in GET /cron: ${error.message}`);
+    throw new Error(`Error in GET /cron: ${error}`);
   }
 }

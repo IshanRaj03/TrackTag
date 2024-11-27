@@ -7,16 +7,35 @@ const Notification = {
   THRESHOLD_MET: "THRESHOLD_MET",
 };
 
+interface ScrapedProduct {
+  url?: string;
+  currency?: string;
+  image?: string;
+  title?: string;
+  currentPrice?: number;
+  originalPrice?: number;
+  priceHistory?: PriceHistoryItem[];
+  discountRate?: number;
+  outOfStock?: boolean;
+  rating?: string;
+  reviewCount?: string;
+  category?: string;
+  productDetails?: string;
+  lowestPrice?: number;
+  highestPrice?: number;
+  averagePrice?: number;
+}
+
 const THRESHOLD_PERCENTAGE = 40;
 
-export function extractPrice(...elements: any) {
+export function extractPrice(...elements: { text: () => string }[]): string {
   for (const element of elements) {
     const priceText = element.text().trim();
 
     if (priceText) {
       const cleanPrice = priceText.replace(/[^\d.]/g, "");
 
-      let firstPrice;
+      let firstPrice: string | undefined;
 
       if (cleanPrice) {
         firstPrice = cleanPrice.match(/\d+\.\d{2}/)?.[0];
@@ -29,9 +48,9 @@ export function extractPrice(...elements: any) {
   return "";
 }
 
-export function extractCurrency(element: any) {
+export function extractCurrency(element: { text: () => string }): string {
   const currencyText = element.text().trim().slice(0, 1);
-  return currencyText ? currencyText : "";
+  return currencyText || "";
 }
 
 export function getHighestPrice(priceList: PriceHistoryItem[]) {
@@ -66,14 +85,14 @@ export function getAveragePrice(priceList: PriceHistoryItem[]) {
 }
 
 export const getEmailNotifType = (
-  scrapedProduct: any,
+  scrapedProduct: ScrapedProduct,
   currentProduct: Product
 ) => {
   const lowestPrice = currentProduct.priceHistory
     ? getLowestPrice(currentProduct.priceHistory)
     : 0;
 
-  if (scrapedProduct.currentPrice < lowestPrice) {
+  if ((scrapedProduct.currentPrice ?? Infinity) < lowestPrice) {
     return Notification.LOWEST_PRICE as keyof typeof Notification;
   }
   if (!scrapedProduct.outOfStock && currentProduct.isOutOfStock) {

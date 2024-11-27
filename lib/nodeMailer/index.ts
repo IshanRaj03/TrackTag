@@ -100,8 +100,8 @@ export async function sendEmail(emailContent: EmailContent, sendTo: string[]) {
     };
     const info = await transporter.sendMail(mailOptions);
     console.log(`Email sent: ${info.response}`);
-  } catch (error: any) {
-    console.error(`Failed to send email: ${error.message}`);
+  } catch (error) {
+    console.error(`Failed to send email: ${error}`);
     throw error;
   }
 }

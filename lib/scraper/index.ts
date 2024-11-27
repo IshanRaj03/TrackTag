@@ -1,12 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { findProxy } from "./proxy";
 import { extractCurrency, extractPrice } from "../utils";
-
-interface Proxy {
-  ip: string;
-  port: number;
-}
 
 export async function scrapeAmazonProduct(url: string) {
   if (!url) return;
@@ -110,7 +104,7 @@ export async function scrapeAmazonProduct(url: string) {
     // console.log(data);
 
     return data;
-  } catch (error: any) {
-    throw new Error(`Faield to scrape Amazon product: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Faield to scrape Amazon product: ${error}`);
   }
 }

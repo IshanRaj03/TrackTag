@@ -4,9 +4,7 @@ import { scrapeAmazonProduct } from "../scraper";
 import prisma, { connectDB } from "@/lib/db";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
 import { revalidatePath } from "next/cache";
-import { Product } from "@/types";
 import { generateEmailBody, sendEmail } from "../nodeMailer";
-import { send } from "process";
 
 export async function scrapeAndStoreProduct(productUrl: string) {
   if (!productUrl) {
@@ -32,7 +30,7 @@ export async function scrapeAndStoreProduct(productUrl: string) {
 
     if (existingProduct) {
       if (
-        existingProduct.priceHistory[0].price === scrapedProduct.currentPrice
+        existingProduct.priceHistory[0]?.price === scrapedProduct.currentPrice
       ) {
         return;
       }
@@ -48,15 +46,6 @@ export async function scrapeAndStoreProduct(productUrl: string) {
         })),
         newPriceEntry,
       ];
-
-      const productData = {
-        ...scrapedProduct,
-        currentPrice: scrapedProduct.currentPrice,
-        lowestPrice: getLowestPrice(updatedPriceHistory),
-        highestPrice: getHighestPrice(updatedPriceHistory),
-        averagePrice: getAveragePrice(updatedPriceHistory),
-      };
-
       await prisma.product.update({
         where: { url: scrapedProduct.url },
         data: {
@@ -112,8 +101,8 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     if (newProduct) {
       revalidatePath(`/products/${newProduct.id}`);
     }
-  } catch (error: any) {
-    throw new Error(`Failed to create/update product: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Failed to create/update product: ${error}`);
   }
 }
 export async function getProductByID(productID: string) {
@@ -127,8 +116,8 @@ export async function getProductByID(productID: string) {
       throw new Error("Product not found");
     }
     return product;
-  } catch (error: any) {
-    throw new Error(`Failed to get product: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Failed to get product: ${error}`);
   }
 }
 export async function getAllProducts() {
@@ -136,8 +125,8 @@ export async function getAllProducts() {
     connectDB();
     const products = await prisma.product.findMany();
     return products;
-  } catch (error: any) {
-    throw new Error(`Failed to get products: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Failed to get products: ${error}`);
   }
 }
 export async function getSimilarProducts(productId: string) {
@@ -160,8 +149,8 @@ export async function getSimilarProducts(productId: string) {
     });
 
     return similarProducts;
-  } catch (error: any) {
-    throw new Error(`Failed to get products: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Failed to get products: ${error}`);
   }
 }
 
@@ -200,7 +189,7 @@ export async function addUserEmailToProduct(
 
       await sendEmail(emailContent, [userEmail]);
     }
-  } catch (error: any) {
-    throw new Error(`Failed to add user email to product: ${error.message}`);
+  } catch (error) {
+    throw new Error(`Failed to add user email to product: ${error}`);
   }
 }
